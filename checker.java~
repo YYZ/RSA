@@ -1,0 +1,57 @@
+import java.math.*;
+import java.util.*;
+import java.io.*;
+import javax.crypto.*;
+import java.security.*;
+
+public class checker{
+    public static void main(String [] args)throws IOException{
+	//Generate digest of code
+	//decrypt using e = 65537 and N
+	//See if they match, which they should!
+	
+
+	BigInteger N = new BigInteger("8695326266be85fc914ba11fb74981a113b6e865ca16607829e4ae009"+
+		"10af3846c461685ae62dd49806f0a89df42ae2944a3647c76c943a65a88ff7006a6b17c8dc57fcf"+
+		"6488f455223e1c7a8343467baf249df6ec98ded8f99bbd8cd6418400e39983702279f22b59c1d1"+
+		"30ce7fbb2c026593f356396fb210aa8b99af6e9ee7", 16);
+
+	BigInteger D = new BigInteger("32a3475364a22e4b9fbbbbf360fb41c012313f5693919e85eaa6668393"+
+		"35b626c7a62a7ff151a15bbd4c8d1359c0a3d610ef496a18643d699a434dd9e21ded91bcc6b143c7df"+
+		"81cb68efe43b3339007512f53996376f51e183fabc1caa3c128c9a503d6c74338262c1cbcde2029a5ec1"+
+		"a5e03f2c79e192c8bc2eab89de57e5b0", 16);
+
+	BigInteger e = new BigInteger("65537");
+
+
+	RandomAccessFile f = new RandomAccessFile("code.txt", "r");
+	byte [] p = new byte[(int)f.length()];
+	f.read(p);
+	BigInteger digest = new BigInteger(p);
+	byte [] h = generateHash(digest);
+	digest = new BigInteger(1,h);
+
+	BigInteger x = decrypt(D,N,e);
+
+	System.out.println("Code Digest is " +digest.toString(16));
+	System.out.println("Unencrypted hash is " + x.toString(16));
+    }
+
+public static byte[] generateHash(BigInteger p){
+    byte [] digest =  new byte[0];
+
+	try{
+		MessageDigest m = MessageDigest.getInstance("SHA-256");
+		digest= p.toByteArray();
+		m.update(digest);
+		digest = m.digest();
+	}
+	catch (Exception e){System.out.println("Error in generateHash");}
+
+	return digest;
+}
+
+public static BigInteger decrypt(BigInteger d, BigInteger N, BigInteger e){
+    return d.modPow(e, N);
+}
+}
